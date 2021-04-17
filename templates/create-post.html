@@ -1,22 +1,60 @@
 {% extends "base.html" %}
-
-{% load crispy_forms_tags %}
-
+{% load widget_tweaks %}
 {% block content %}
-    {# Page Content #}
-    <div class="container">
-        <div class="row">
-            {# Form field column #}
-            <div class="col-md-8 mb-4">
-                <h1 class="my-4">{{ title }}</h1>
-                {{ form.media }}
-                <form method="POST" action=".">
-                    {% csrf_token %}
-                    {{ form|crispy }}
-                    <button class="btn btn-block btn-primary" type="submit">Create</button>
-                </form>
-            </div>
-            {% include "includes/side-widgets.html" with categories=categories %}
-        </div>
+  <div class="container my-5">
+    <div class="row">
+      <div class="col-md-8">
+        <h4 class="mb-3">{{ title }}</h4>
+        {{ form.media }}
+        <form action="." method="POST">
+          {% csrf_token %}
+          {% for field in form %}
+            {# Title #}
+            {% if field.name == 'title' %}
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+                  {{ form.title|add_class:"form-control" }}
+                </div>
+              </div>
+              {# Categories #}
+              {% elif field.name == 'categories' %}
+              <hr class="mb-4">
+              <h5>Categories</h5>
+              {% for category in categories  %}
+                <div class="custom-control custom-checkbox">
+                  <input
+                  value="{{ category.id }}"
+                  name="{{ form.categories.name }}"
+                  type="checkbox"
+                  class="custom-control-input"
+                  id="{{ category.id }}"
+                  {% if category.id in form.categories.value %}checked{% endif %}
+                  >{# end of input #}
+                  <label class="custom-control-label" for="{{ category.id }}">{{ category }}</label>
+                </div>
+              {% endfor %}
+            {% else %}
+              {# Rest of the form field #}
+              <div class="mb-3">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field|add_class:"form-control" }}
+                {# Field errors #}
+                {% if field.errors %}
+                  <small class="form-text text-danger">{{ field.errors }}</small>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+          <hr class="mb-4">
+          {% if request.resolver_match.url_name == 'update' %}
+            <button class="btn btn-primary btn-lg btn-block" type="submit">Update</button>
+          {% else %}
+            <button class="btn btn-primary btn-lg btn-block" type="submit">Create</button>
+          {% endif %}
+        </form>
+      </div>
+      {% include "includes/side-widgets.html" %}
     </div>
+  </div>
 {% endblock content %}

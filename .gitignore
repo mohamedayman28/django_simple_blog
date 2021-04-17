@@ -1,0 +1,8 @@
+# Specify filepatterns you want git to ignore.
+
+__pycache__
+db.sqlite3
+migrations
+__init__.py
+.vscode
+migrations
