@@ -1,15 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
-  {# Page Content #}
   <div class="container">
     <div class="row">
-      {# Blog Entries Column #}
+
       <div class="col-md-8">
+        {# Page main title #}
         <h1 class="my-4">{{ title }}</h1>
-        {# Search match #}
         {% if posts %}
           {% for post in posts  %}
-            {# Blog Post #}
             <div class="card mb-4">
               {% if post.thumbnail %}
                 <img class="card-img-top" src="{{ post.thumbnail.url }}">
@@ -21,41 +19,43 @@
               </div>
               <div class="card-footer text-muted">
                 <span class="btn btn-light disabled">Posted on {{ post.timestamp.date }}</span>
-                {# CRUD operations by author user #}
+                {# If user is the post author, show CRUD operations  #}
                 {% if post.author.name == user.author.name %}
+
+                  {# Delete post button #}
                   <span class="btn btn-danger float-right mx-2"
                     data-toggle="modal" data-target="#deleteModal">
-                    Delete
+                    Delete forever
                   </span>
-                  {# Delete modal structure #}
+                  {# Confirmation message, appears on delete button click #}
                   <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
                       <div class="modal-content">
-                        {# Warning message #}
+                        {# Message #}
                         <div class="modal-header">
                           <h5 class="modal-title" id="exampleModalLabel">
-                          Are you sure to delete <a href="{{ post.get_absolute_url }}"><b>{{ post.title }}</b></a>
+                          Are you sure to delete <b>{{ post.title }}</b> post!!
                           </h5>
-                          {# Close modal icon #}
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                          </button>
                         </div>
                         <div class="modal-footer">
-                          {# Close modal button #}
-                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                          {# Message dismiss button #}
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Keep and dismiss</button>
                           {# Confirm deletion button #}
-                          <a href="{{ post.get_delete_url }}" role="button" class="btn btn-danger">Confirm Deletion</a>
+                          <a href="{{ post.get_delete_url }}" role="button" class="btn btn-danger">Delete forever</a>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <a href="{{ post.get_update_url }}" role="button" class="btn btn-primary float-right mx-2">Update</a>
-                {% endif %}
+
+                  {# Update post button #}
+                  <a href="{{ post.get_update_url }}" role="button" class="btn btn-primary float-right mx-2">Update post</a>
+                {% endif %} {# End of if user is the post author condition #}
+
               </div>
             </div>
-          {% endfor %}
-          {# No search match #}
+          {% endfor %} {# End of looping over each post #}
+
+        {# Message to show if there is no posts, or no match on search #}
         {% else %}
           <div class="card bg-light mb-3">
             <div class="card-body">
@@ -66,10 +66,12 @@
             </div>
           </div>
         {% endif %}
-        {# Pagination #}
+
+        {# Paginate the posts #}
         {% include "includes/paginator.html" with posts=posts %}
-      </div>
+      </div> {# End of container.row.col-md-8 #}
+
       {% include "includes/side-widgets.html" with categories=categories %}
-    </div>
-  </div>
+    </div> {# End of container.row #}
+  </div> {# End of container #}
 {% endblock content %}
