@@ -6,3 +6,4 @@ migrations
 __init__.py
 .vscode
 migrations
+media_root

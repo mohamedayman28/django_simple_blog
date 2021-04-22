@@ -1,6 +1,5 @@
 # Default
 from django.forms import ModelForm
-
 # Local Django
 from posts.models import Comment, Post
 

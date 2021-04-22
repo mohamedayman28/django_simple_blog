@@ -27,15 +27,15 @@
               </div>
 
               {% elif field.name == 'categories' %}
-              <h5>Categories</h5>
-              {% for category in categories  %}
-                <div class="custom-control custom-checkbox mb-3">
-                  <input value="{{ category.id }}" name="{{ form.categories.name }}"
-                  type="checkbox" class="custom-control-input" id="{{ category.id }}"
-                  {% if category.id in form.categories.value %}checked{% endif %}>{# end of input #}
-                  <label class="custom-control-label" for="{{ category.id }}">{{ category }}</label>
-                </div>
-              {% endfor %}
+                <h5>Categories</h5>
+                {% for category in categories  %}
+                  <div class="custom-control custom-checkbox">
+                    <input value="{{ category.id }}" name="{{ form.categories.name }}"
+                    type="checkbox" class="custom-control-input" id="{{ category.id }}"
+                    {% if category.id in form.categories.value %}checked{% endif %}>
+                    <label class="custom-control-label" for="{{ category.id }}">{{ category }}</label>
+                  </div>
+                {% endfor %}
 
               {% else %}
               <div class="mb-3">
@@ -61,6 +61,7 @@
 
       {# Side widget #}
       {% include "includes/side-widgets.html" %}
+
     </div> {# End of container.row #}
   </div>  {# End of container #}
 {% endblock content %}

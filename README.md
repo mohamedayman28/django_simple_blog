@@ -4,6 +4,8 @@
 
 To set the site up locally, you'll need to have Python 3.6 or higher version installed on your local machine. Once that is done and ready, proceed to download the repository with the next steps.
 
+**Note:** I'm using Lubunut OS on my local machine.
+
 ### 1. Make the directory for development:
 ```bash
 mkdir simple_blog

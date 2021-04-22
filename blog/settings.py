@@ -31,8 +31,10 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    # Created Apps
+    # Created Apps.
     'posts',
+    'accounts',
+
     # Defaults
     'django.contrib.admin',
     'django.contrib.auth',
@@ -40,13 +42,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     # Third party
     'filebrowser',
     'tinymce',
-    'crispy_forms',
+    'widget_tweaks',
+    'debug_toolbar',
 ]
 
+
 MIDDLEWARE = [
+    # Third party
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+
+    # Django
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -132,26 +141,20 @@ MEDIA_ROOT = BASE_DIR / 'media_root'
 # For deployment
 STATIC_ROOT = BASE_DIR / 'static_in_deploy'
 
-# Filebrowser settings
+# Third party
 
+# Filebrowser
 FILEBROWSER_DIRECTORY = ''
 DIRECTORY = ''
-
-# Crispy forms
-
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
-
-# Authentications settings
-
-LOGIN_REDIRECT_URL = 'posts:create'
-LOGOUT_REDIRECT_URL = 'posts:home_page'
-
-# TinyMce settings
-
+# Debug toolbar
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
+# TinyMCE
 TINYMCE_DEFAULT_CONFIG = {
     # Comment to maximize the width and height according to the parent div
     # 'height': 360,
-    # 'width': 970,
+    # 'width': 770,  # Commented for the size be 100% within the post form.
     'cleanup_on_startup': True,
     'custom_undo_redo_levels': 20,
     'selector':

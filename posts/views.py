@@ -9,12 +9,20 @@ from django.shortcuts import get_object_or_404, redirect, render, reverse
 from posts.forms import CommentForm, PostForm
 from posts.models import Category, Post
 
-# Global variable to be usable within multi view functions
-categories = Category.objects.all()
-
 
 def home_page(request, category=None):
-    """ Mutual view for all posts and search results."""
+    """Mutual view for all posts and search results.
+
+    On GET request all post will show up, if the GET request made using the
+    search bar, posts will be filtred according to the entered search query.
+
+    Keyword Arguments:
+        category {str} -- Search query (default: {None})
+
+    Returns:
+        Queryset -- Either all posts or the filtered posts according to the
+        search query.
+    """
 
     title = 'Home page'
     posts = Post.objects.all()
@@ -47,7 +55,7 @@ def home_page(request, category=None):
     context = {
         'title': title,
         'posts': paginated_queryset,
-        'categories': categories,
+        'categories': Category.objects.all(),
         #   If posts are related to search query. Paginate the search results
         # using the query as a string parameter
         'query': query
@@ -57,30 +65,14 @@ def home_page(request, category=None):
 
 
 def post_details(request, id):
-    """ Show post details and handle the comment form."""
-
     try:
         post = Post.objects.get(id=id)
-
-        # Handle Comment form.
-        if request.method == 'POST':
-            form = CommentForm(request.POST)
-            # Populate form instance.
-            form.instance.commenter = request.user
-            form.instance.post = post
-            form.instance.content = request.POST.get('content')
-
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Thanks for your comment!!.')
-                return redirect(reverse('posts:details', kwargs={'id': post.id}))
-
     except (Post.DoesNotExist, ValueError):
         messages.warning(request, 'Post does not exist.')
-        return redirect('posts:home_page')
+        return redirect('post_home_page')
 
     context = {
-        'categories': categories,
+        'categories': Category.objects.all(),
         'post': post,
     }
 
@@ -89,9 +81,10 @@ def post_details(request, id):
 
 @login_required(login_url="accounts:signin")
 def post_form(request, id=None):
-    """ Create/Update/Delete operations in one view."""
+    """ Create/Update/Delete post."""
+
     context = {
-        'categories': categories,
+        'categories': Category.objects.all(),
         'title': None,
         'form': None,
         'post': None,
@@ -104,20 +97,20 @@ def post_form(request, id=None):
         if author:
             # Post model CRUD operations.
             # Delete request.
-            if request.resolver_match.url_name == 'delete':
+            if request.resolver_match.url_name == 'post_delete':
                 post = get_object_or_404(Post, id=id)
                 messages.success(request, f'{post.title} deleted.')
                 post.delete()
-                return redirect('posts:home_page')
+                return redirect('post_home_page')
             # NOTE: Both Update and Create request related to the same HTML.
             # Update request with model instance for the form.
-            elif request.resolver_match.url_name == 'update':
+            elif request.resolver_match.url_name == 'post_update':
                 context['title'] = 'Update post'
                 post = get_object_or_404(Post, id=id)
                 form = PostForm(request.POST or None, instance=post)
                 # Next to general render.
             # Create request with regular form.
-            elif request.resolver_match.url_name == 'create':
+            elif request.resolver_match.url_name == 'post_create':
                 context['title'] = 'Create new post'
                 form = PostForm(request.POST or None)
                 # Next to general render.
@@ -129,7 +122,7 @@ def post_form(request, id=None):
                     form.save()
                     messages.success(request, f'{form.instance.title} Created')
                     return redirect(
-                        reverse('posts:details', kwargs={
+                        reverse('post_details', kwargs={
                                 'id': form.instance.id})
                     )
 
@@ -140,4 +133,31 @@ def post_form(request, id=None):
     # If user is not an author.
     except Exception as e:
         messages.warning(request, e)
-        return redirect('posts:home_page')
+        return redirect('post_home_page')
+
+
+def post_comment_create(request, id):
+    post = Post.objects.get(pk=id)
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        # Populate form instance.
+        form.instance.commenter = request.user
+        form.instance.post = post
+        form.instance.content = request.POST.get('content')
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Thanks for your comment!!.')
+            return redirect(reverse('post_details', kwargs={'id': post.id}))
+
+    else:
+        messages.warning(request, 'Post does not exist.')
+        return redirect('post_home_page')
+
+    context = {
+        'categories': Category.objects.all(),
+        'post': post,
+    }
+
+    return render(request, 'post-details.html', context)
