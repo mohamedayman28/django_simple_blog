@@ -9,7 +9,7 @@ from tinymce import HTMLField
 
 
 class Author(models.Model):
-    # Relation
+    # Relation columns
     name = models.OneToOneField(User, on_delete=models.CASCADE)
 
     class Meta:
@@ -20,7 +20,6 @@ class Author(models.Model):
 
 
 class Category(models.Model):
-    # Relation
     name = models.CharField(max_length=20)
 
     class Meta:
@@ -31,10 +30,11 @@ class Category(models.Model):
 
 
 class Post(models.Model):
-    # Relation
+    # Relation columns
     author = models.ForeignKey(Author, on_delete=models.CASCADE, null=True)
     categories = models.ManyToManyField(Category)
-    # Attributes
+
+    # Normal columns
     title = models.CharField(max_length=50)
     thumbnail = FileBrowseField(max_length=200, null=True)
     content = HTMLField(null=True)
@@ -43,6 +43,10 @@ class Post(models.Model):
     class Meta:
         ordering = ['-timestamp']
         verbose_name_plural = 'Post'
+        indexes = [
+            models.Index(fields=['content']),
+            models.Index(fields=['title'])
+        ]
 
     def __str__(self):
         return self.title
@@ -61,9 +65,10 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
-    # Relation
+    # Relation columns
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    # Attributes
+
+    # Normal columns
     commenter = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now=True)

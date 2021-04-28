@@ -4,8 +4,6 @@
 
 To set the site up locally, you'll need to have Python 3.6 or higher version installed on your local machine. Once that is done and ready, proceed to download the repository with the next steps.
 
-**Note:** I'm using Lubunut OS on my local machine.
-
 ### 1. Make the directory for development:
 ```bash
 mkdir simple_blog
@@ -51,10 +49,10 @@ python manage.py migrate posts
 ```
 
 ### 6. Create Super User
-Only authors allowed to write posts, for that, you first need to access the admin panel and create an author, thus need to be a super-user:
 ```bash
 python manage.py createsuperuser
 ```
+Only authors allowed to write posts, and you will need to create author manually.
 
 ### 7. Run the app:
 ```bash
@@ -66,4 +64,4 @@ You may encounter this log error while using filebrowser
 ```
 Error finding Upload-Folder (site.storage.location + site.directory). Maybe it does not exist?
 ```
-If that the case, create folder in the app root directory (where manage.py and templates exists) named as the name set in the settings.MEDIA_ROOT
+If that the case, create folder in the app root directory (with manage.py and the templates folder) named as the name set in the settings.MEDIA_ROOT

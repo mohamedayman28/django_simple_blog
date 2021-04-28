@@ -1,22 +1,24 @@
+# Django
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import reverse, redirect, render, get_object_or_404
 from django.contrib.auth import views as auth_views, login
 
+# Local apps
 from accounts.forms import CreateUserForm
 
 
 class LoginView(SuccessMessageMixin, auth_views.LoginView):
     template_name = 'accounts/login.html'
-    # Redirect to home page if try to access URL(accounts:login).
+    # Redirect authenticated user to home page, if try to access the login view.
     redirect_authenticated_user = True
     success_message = 'You have loggedin successfully!'
 
     extra_context = {'title': 'Login'}
 
     def get_success_url(self):
-        return reverse('posts:home_page')
+        return reverse('post_home_page')
 
 
 def user_form(request, id=None):

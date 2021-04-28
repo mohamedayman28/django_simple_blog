@@ -1,6 +1,7 @@
-# Default
+# Django
 from django.forms import ModelForm
-# Local Django
+
+# Local apps
 from posts.models import Comment, Post
 
 

@@ -31,9 +31,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # NOTE: The order is required for some third party apps to work properly.
+
     # Created Apps.
     'posts',
     'accounts',
+
+    # Third party
+    'livereload',
 
     # Defaults
     'django.contrib.admin',
@@ -48,10 +53,13 @@ INSTALLED_APPS = [
     'tinymce',
     'widget_tweaks',
     'debug_toolbar',
+
 ]
 
 
 MIDDLEWARE = [
+    # NOTE: The order is required for some third party apps to work properly.
+
     # Third party
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 
@@ -63,6 +71,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # Third party
+    'livereload.middleware.LiveReloadScript',
 ]
 
 ROOT_URLCONF = 'blog.urls'
@@ -152,9 +163,8 @@ INTERNAL_IPS = [
 ]
 # TinyMCE
 TINYMCE_DEFAULT_CONFIG = {
-    # Comment to maximize the width and height according to the parent div
     # 'height': 360,
-    # 'width': 770,  # Commented for the size be 100% within the post form.
+    # 'width': 770,
     'cleanup_on_startup': True,
     'custom_undo_redo_levels': 20,
     'selector':
