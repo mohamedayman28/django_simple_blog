@@ -1,4 +1,10 @@
 # Django Simple Blog
+<!-- Brief description goes here -->
+
+#### Jump to:
+* [Setting up locally](#setting-up-locally)
+* [File Browser package error](#file-browser-package-error)
+* [Populate database with dummy data](#populate-database-with-dummy-data)
 
 ## Setting up locally
 
@@ -31,7 +37,7 @@ git init
 git clone https://github.com/mohamedayman28/django_simple_blog
 ```
 
-### 4. After, successfully, activating the virtualenv and download the repository, install required packages:
+### 4. After, activating the virtualenv and download the repository, install required packages:
 ```bash
 cd django_simple_blog
 pip install -r requirements.txt
@@ -59,9 +65,37 @@ Only authors allowed to write posts, and you will need to create author manually
 python manage.py runserver
 ```
 
-## Handle FileBrowser error
+### File Browser package error
 You may encounter this log error while using filebrowser
 ```
 Error finding Upload-Folder (site.storage.location + site.directory). Maybe it does not exist?
 ```
-If that the case, create folder in the app root directory (with manage.py and the templates folder) named as the name set in the settings.MEDIA_ROOT
+If that the case, create folder in the app root directory (with manage.py and
+the templates folder) named as the name set in the settings.MEDIA_ROOT
+
+
+### Populate database with dummy data
+I included a file called factories, regarding the test purposes it's originally
+developed for, I use it to populate the database with dummy data, so it's up to
+you to remove the file or keep it.
+
+Anyway, this is how I populate the database:
+
+* First activate Django shell
+```python
+python manage.py shell
+```
+
+* then import PostFactory and loop over the number of times you want your database
+to get populated
+```python
+from posts.factories import PostFactory
+
+# Populate database 20 times with different text.
+for i in range(20):
+    PostFactory()
+```
+
+**Note:** The previous steps does not follow the best practice or a SAVING TIME
+approach, and I didn't invest time for enhancement or search for a better approach
+since I needed the population once, so enhancement is up to you.
