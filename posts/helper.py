@@ -5,11 +5,12 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 def pagination(request, queryset, objects_per_page):
     """Paginate post objects.
 
-    NOTE: I didn't try to use the function to paginate other queryset other than post objects.
+    NOTE: I didn't try to use the pagination() withother queryset other than
+    post objects.
 
     Arguments:
-        request -- Need to call the funtion within a view so that you would be able the pass the Django request
-        queryset
+        request -- Need to call pagination() within a view
+        so that you would be able the pass the Django request queryset
         objects_per_page {int} -- How many objects need to be returned.
     """
 
