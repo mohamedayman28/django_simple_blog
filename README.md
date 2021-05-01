@@ -37,7 +37,7 @@ git init
 git clone https://github.com/mohamedayman28/django_simple_blog
 ```
 
-### 4. After, activating the virtualenv and download the repository, install required packages:
+### 4. Install required packages:
 ```bash
 cd django_simple_blog
 pip install -r requirements.txt
