@@ -1,11 +1,9 @@
-{# NOTE: This pagination associated with posts.views.home_page #}
-
 <ul class="pagination justify-content-center mb-4">
 
-  {% if posts.has_previous %}
+  {% if queryset.has_previous %}
     <li class="page-item">
       <a class="page-link"
-        href="?page={{ posts.previous_page_number }}{% if query %}&query={{ query }}{% endif %}">
+        href="?page={{ queryset.previous_page_number }}{% if query %}&query={{ query }}{% endif %}">
         &larr; Previous
       </a>
     </li>
@@ -15,10 +13,10 @@
     </li>
   {% endif %}
 
-  {% if posts.has_next %}
+  {% if queryset.has_next %}
     <li class="page-item">
       <a class="page-link"
-        href="?page={{ posts.next_page_number }}{% if query %}&query={{ query }}{% endif %}">
+        href="?page={{ queryset.next_page_number }}{% if query %}&query={{ query }}{% endif %}">
         Next &rarr;
       </a>
     </li>

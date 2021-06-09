@@ -34,8 +34,8 @@ INSTALLED_APPS = [
     # NOTE: The order is required for some third party apps to work properly.
 
     # Created Apps.
-    'posts',
-    'accounts',
+    'posts.apps.PostsConfig',
+    'accounts.apps.AccountsConfig',
 
     # Third party
     'livereload',
@@ -53,13 +53,10 @@ INSTALLED_APPS = [
     'tinymce',
     'widget_tweaks',
     'debug_toolbar',
-
 ]
 
 
 MIDDLEWARE = [
-    # NOTE: The order is required for some third party apps to work properly.
-
     # Third party
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 
@@ -146,22 +143,24 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
-# During development
+
+# During development.
 STATICFILES_DIRS = [BASE_DIR / 'static']
 MEDIA_ROOT = BASE_DIR / 'media_root'
-# For deployment
+
+# During deployment.
 STATIC_ROOT = BASE_DIR / 'static_in_deploy'
 
-# Third party
-
-# Filebrowser
+# Third party: Filebrowser.
 FILEBROWSER_DIRECTORY = ''
 DIRECTORY = ''
-# Debug toolbar
+
+# Third party: Debug toolbar.
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
-# TinyMCE
+
+# Third party: TinyMCE.
 TINYMCE_DEFAULT_CONFIG = {
     # 'height': 360,
     # 'width': 770,

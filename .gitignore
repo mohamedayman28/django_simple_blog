@@ -7,3 +7,4 @@ __init__.py
 .vscode
 migrations
 media_root
+todos.py

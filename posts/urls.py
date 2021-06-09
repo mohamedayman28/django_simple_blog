@@ -6,20 +6,16 @@ from posts import views
 
 
 urlpatterns = [
-    # List posts.
-    path('', views.home_page, name='post_home_page'),
-    # List posts related to author.
-    path('author-posts', views.author_posts, name='author_posts'),
-    # Create new post.
-    path('create-post/', views.post_form, name='post_create'),
-    # Get post details.
+    path('', views.post_list, name='post_list'),
+    path('post-author/', views.post_related_to_author, name='post_related_to_author'),
+    path('post-create/', views.post_create, name='post_create'),
+    path('post-search/', views.post_search, name='post_search'),
+    path('post-delete/<int:id>/', views.post_delete, name='post_delete'),
+    path('post-update/<int:id>/', views.post_update, name='post_update'),
+    path('post/<int:id>/comment-create/', views.comment_create, name='comment_create'),
     path('post/<int:id>/', views.post_details, name='post_details'),
-    # Create comment related to post.
-    path('post/<int:id>/create-comment/', views.post_comment_create, name='post_comment_create'),
-    # Update post.
-    path('update-post/<int:id>/', views.post_form, name='post_update'),
-    # Delete post
-    path('delete-post/<int:id>/', views.post_form, name='post_delete'),
-    # Filter posts by category.
-    path('category/<str:category>/', views.home_page, name='post_category'),
+    path('post/<str:category>/', views.post_filter_by_category, name='post_filter_by_category'),
+
+    path('notification/', views.notification_list, name='notification_list'),
+    path('notification/<int:id>/', views.notification_details, name='notification_details'),
 ]

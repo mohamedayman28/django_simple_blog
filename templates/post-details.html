@@ -6,11 +6,8 @@
       <div class="col-lg-8">
 
         <h1 class="mt-4">{{ post.title }}</h1>
-
-        <p>Posted on {{ post.timestamp.date }}</p>
-
+        <p>Posted on {{ post.created_time.date }}</p>
         <img class="img-fluid" src="{{ post.thumbnail.url }}">
-
         {{ post.content|safe }}
 
         <h2>Comments</h2>
@@ -20,7 +17,7 @@
           <div class="card my-4">
             <h5 class="card-header">Leave a Comment:</h5>
             <div class="card-body">
-              <form method="POST" action="{% url "post_comment_create" post.id %}">
+              <form method="POST" action="{% url "comment_create" post.id %}">
                 {% csrf_token %}
                 <div class="form-group">
                   <textarea class="form-control" rows="3" name="content"></textarea>
@@ -33,25 +30,25 @@
           <p><a href="{% url 'accounts_login' %}">Login</a> to add commnet.</p>
         {% endif %}
 
-        {# Show all Comments #}
+        {# Comment list #}
         {% for comment in post.comment_set.all %}
           <div class="media mb-4">
-            {# Picture #}
             <img class="d-flex mr-3 rounded-circle" src="{% static 'img/default.jpg' %}" style="width:50px;">
             <div class="media-body">
-              {# Comment username #}
-              <h5 class="mt-0">{{ comment.commenter.username }}</h5>
-              {# Comment content #}
-              {{ comment.content }}
+              <h5 class="mt-0" id="{{ comment.id }}">
+                {{ comment.username }}</h5>
+                {{ comment.content }}
             </div>
           </div>
         {% endfor %}
-
-      </div> {# End of col-lg-8 within container.row #}
+      {# ./col-lg-8 #}
+      </div>
 
       {% include "includes/side-widgets.html" with categories=categories %}
 
-    </div> {# End of container.row #}
-  </div> {# End of container #}
+    {# ./row #}
+    </div>
+  {# ./container #}
+  </div>
 
 {% endblock content %}

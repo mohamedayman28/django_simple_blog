@@ -1,76 +1,160 @@
 # Django
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render, reverse
-from django.http import HttpResponse
-
+from django.views.decorators.http import (require_GET, require_http_methods,
+                                          require_POST)
 # Local apps
 from posts.forms import CommentForm, PostForm
-from posts.helper import pagination
-from posts.models import Category, Post
+from posts.helpers import pagination
+from posts.models import Category, Notification, Post
 
 
-def home_page(request, category=None):
-    """List posts and filter on Query String or Keyword.
+@require_GET
+def post_list(request, category=None):
+    posts = Post.objects.only('id', 'thumbnail', 'title', 'created_time')
 
-    On GET request List all posts.
-    If GET request made from the search bar, filter and list posts by query
-    string.
-    If GET request made with URL captured value EX:<category>, filter and list
-    posts by query string.
+    context = {
+        'title': 'Home page',
+        'posts': pagination(request, posts, 6),
+        'categories': Category.objects.all(),
+    }
 
-    Keyword Arguments:
-        category {str} -- URL captured value EX:<category> (default: {None})
+    return render(request, 'post-list.html', context)
 
-    Returns:
-        Queryset -- Post objects within home.html.
-    """
 
-    title = 'Home page'
-    posts = Post.objects.only('id', 'thumbnail', 'title', 'timestamp')
+@require_GET
+def post_filter_by_category(request, category=None):
+    posts = Post.objects.only('id', 'thumbnail', 'title', 'created_time')
 
-    # If request has category argument, filter using that argument.
     if category:
         posts = Post.objects.filter(categories__name__icontains=category)\
-            .only('id', 'thumbnail', 'title', 'timestamp')
+            .only('id', 'thumbnail', 'title', 'created_time')
+
+    context = {
+        'title': f'{category} posts',
+        'posts': pagination(request, posts, 6),
+        'categories': Category.objects.all(),
+    }
+
+    return render(request, 'post-list.html', context)
+
+
+@require_GET
+def post_search(request):
+    posts = Post.objects.only('id', 'thumbnail', 'title', 'created_time')
 
     query = request.GET.get('query')
-
-    # If GET request from search bar
+    # Query is not just space characters.
     if query and not query.isspace():
-        title = 'Search results'
         posts = Post.objects.filter(
             Q(title__icontains=query) | Q(content__icontains=query)
         )
 
+    print(query)
+
     context = {
-        'title': title,
+        'title': 'Search results',
         'posts': pagination(request, posts, 6),
         'categories': Category.objects.all(),
-        # Passing query value in the response to receive it with the request so
-        # that it be possible to paginate the filtered queryset.
+        # Passing query value in the HttpResponse, to receive it with the
+        # HttpRequest so that it be possible to paginate the search results.
         # -- refer to includes/paginator.html --
         'query': query
     }
 
-    return render(request, 'home.html', context)
+    return render(request, 'post-list.html', context)
 
 
-def post_details(request, id):
+@require_http_methods(["GET", "POST"])
+@login_required(login_url="accounts_login")
+def post_create(request):
     """
-    Arguments:
-        id {int} -- Get post with its id.
-
-    Returns:
-        Object -- Post object within post-details.html.
+    Allow Author to create post.
     """
-
     try:
+        author = request.user.author
+
+        form = PostForm(request.POST or None)
+        if request.method == 'POST':
+            form.instance.author = author
+            if form.is_valid():
+                form.save()
+                messages.success(request, f'{form.instance.title} Created')
+                return redirect(
+                    reverse('post_details', kwargs={'id': form.instance.id})
+                )
+
+        context = {
+            'title': 'Create Post.',
+            'categories': Category.objects.all(),
+            'form': form,
+        }
+
+        return render(request, 'post-create.html', context)
+
+    except ObjectDoesNotExist:
+        messages.warning(request, 'Not authorized.')
+        return redirect('post_list')
+
+
+@require_http_methods(["GET", "POST"])
+@login_required(login_url="accounts_login")
+def post_update(request, id):
+    """
+    Allow Author to update post.
+    """
+    try:
+        author = request.user.author
+
         post = Post.objects.get(id=id)
-    except (Post.DoesNotExist, ValueError):
-        messages.warning(request, 'Post does not exist.')
-        return redirect('post_home_page')
+        form = PostForm(request.POST or None, instance=post)
+        if request.method == 'POST':
+            form.instance.author = author
+            if form.is_valid():
+                form.save()
+                messages.success(request, f'{form.instance.title} updated.')
+                return redirect(
+                    reverse('post_details', kwargs={'id': form.instance.id})
+                )
+
+        context = {
+            'title': 'Create Post.',
+            'categories': Category.objects.all(),
+            'form': form,
+        }
+
+        return render(request, 'post-create.html', context)
+
+    except ObjectDoesNotExist:
+        messages.warning(request, 'Not authorized.')
+        return redirect('post_list')
+
+
+@require_GET
+@login_required(login_url="accounts_login")
+def post_delete(request, id):
+    """
+    Allow Author to delete post.
+    """
+    try:
+        request.user.author
+
+        post = get_object_or_404(Post, id=id)
+        messages.success(request, f'{post.title} deleted.')
+        post.delete()
+        return redirect('post_list')
+
+    except ObjectDoesNotExist:
+        messages.warning(request, 'Not authorized.')
+        return redirect('post_list')
+
+
+@require_GET
+def post_details(request, id):
+    post = get_object_or_404(Post, id=id)
 
     context = {
         'categories': Category.objects.all(),
@@ -80,134 +164,71 @@ def post_details(request, id):
     return render(request, 'post-details.html', context)
 
 
+@require_GET
 @login_required(login_url="accounts_login")
-def author_posts(request):
-    """List posts related to an author.
-
-    On GET request, If user:
-        Not logged-in redirect to login page.
-        Logged-in but is not an author, redirect to the home page.
-        Logged-in and is an author, list posts related to that user.
-
-    Decorators:
-        login_required
-    """
-
+def post_related_to_author(request):
     author = request.user.author
     posts = Post.objects.filter(author=author).only('id', 'title')
 
-    # If at least one result exists
     if posts.exists():
         context = {
             'posts': pagination(request, posts, 6),
             'categories': Category.objects.all()
         }
-        return render(request, 'author-posts.html', context)
+        return render(request, 'post-list.html', context)
     else:
-        return redirect(reverse('post_home_page'))
+        return redirect(reverse('post_list'))
 
 
+@require_POST
 @login_required(login_url="accounts_login")
-def post_form(request, id=None):
-    """Create/Update/Delete post.
+def comment_create(request, id):
+    post = get_object_or_404(Post, pk=id)
+    form = CommentForm(request.POST)
+    form.instance.post = post
+    form.instance.content = request.POST.get('content')
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'Thanks for your comment!!.')
+        return redirect(reverse('post_details', kwargs={'id': post.id}))
+    else:
+        messages.warning(request, 'Sorry, something went wrong!!.')
+        return redirect(post_list)
 
-    If user is not an author redirect ot home page.
-    If user is an author they can Create/Update/Delete related post objects.
 
-    Decorators:
-        login_required
-
-    Keyword Arguments:
-        id {int} -- Get post with its id (default: {None}).
-
-    Returns:
-        Object -- Post object within post-details.html.
+@require_GET
+@login_required(login_url="accounts_login")
+def notification_list(request):
     """
-
-    context = {
-        'categories': Category.objects.all(),
-        'title': None,
-        'form': None,
-        'post': None,
-    }
-
-    # Make sure request made by an author.
-    try:
-        author = request.user.author
-
-        # If user is an author, they have the option to CRUD on related post.
-        if author:
-            url_name = request.resolver_match.url_name
-
-            # Delete request.
-            if url_name == 'post_delete':
-                post = get_object_or_404(Post, id=id)
-                messages.success(request, f'{post.title} deleted.')
-                post.delete()
-                return redirect('post_home_page')
-
-            # Update request with model instance for the form.
-            elif url_name == 'post_update':
-                context['title'] = 'Update post'
-                post = get_object_or_404(Post, id=id)
-                form = PostForm(request.POST or None, instance=post)
-                # Next: Handle the form. Then: Render create-post.html.
-
-            # Create request with regular form.
-            elif url_name == 'post_create':
-                context['title'] = 'Create new post'
-                form = PostForm(request.POST or None)
-                # Next: Handle the form. Then: Render create-post.html.
-
-            # Mutual form behavior between Update and Create post.
-            if request.method == 'POST':
-                if form.is_valid():
-                    form.instance.author = author
-                    form.save()
-                    messages.success(request, f'{form.instance.title} Created')
-                    return redirect(
-                        reverse('post_details', kwargs={
-                                'id': form.instance.id})
-                    )
-
-            context['form'] = form
-            return render(request, 'create-post.html', context)
-
-    # If user is not an author.
-    except Exception as e:
-        messages.warning(request, e)
-        return redirect('post_home_page')
-
-
-def post_comment_create(request, id):
-    """Create comment related to post object.
-
-    Arguments:
-        id {int} -- Get post with its id.
+    List current notifications related to current logged-in Author.
     """
     try:
-        post = get_object_or_404(Post, pk=id)
+        author = request.user.author.id
+        notifications = Notification.objects.select_related('post').\
+            filter(post__author=author)
+        if notifications.exists():
+            title = 'Notifications'
+            notifications = pagination(request, notifications, 20)
+        else:
+            title = 'No notifications'
+            notifications = None
 
-        if request.method == 'POST':
-            form = CommentForm(request.POST)
-            # Populate form instance.
-            form.instance.commenter = request.user
-            form.instance.post = post
-            form.instance.content = request.POST.get('content')
-
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Thanks for your comment!!.')
-                return redirect(reverse('post_details', kwargs={'id': post.id}))
-
-    # On GET request attempt, or the post object does not exist.
-    except:
-        messages.warning(request, 'Post does not exist.')
-        return redirect('post_home_page')
+    # Logged-in User not an Author
+    except ObjectDoesNotExist:
+        pass
 
     context = {
-        'categories': Category.objects.all(),
-        'post': post,
+        'title': title,
+        'notifications': notifications
     }
 
-    return render(request, 'post-details.html', context)
+    return render(request, 'notifications.html', context)
+
+
+@require_GET
+def notification_details(request, id):
+    notification = Notification.objects.get(id=id)
+    notification.viewed = True
+    notification.save()
+
+    return redirect(notification.get_absolute_url())

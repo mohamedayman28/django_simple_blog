@@ -1,17 +1,18 @@
+"""
+Module for repeated objects used within views.
+"""
+
 # Django
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 
 
 def pagination(request, queryset, objects_per_page):
-    """Paginate post objects.
+    """
+    Return paginated queryset according to the number passed to
+    objects_per_page argument.
 
-    NOTE: I didn't try to use the pagination() withother queryset other than
-    post objects.
-
-    Arguments:
-        request -- Need to call pagination() within a view
-        so that you would be able the pass the Django request queryset
-        objects_per_page {int} -- How many objects need to be returned.
+    Workd only within a function view or class based view method with request
+    argument passed to it.
     """
 
     paginator = Paginator(queryset, objects_per_page)

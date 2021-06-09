@@ -1,4 +1,4 @@
-{# That template related to both update and create post request #}
+{# This template mutual between update and create post #}
 
 {% extends "base.html" %}
 {% load widget_tweaks %}
@@ -7,7 +7,7 @@
   <div class="container my-5">
     <div class="row">
       <div class="col-md-8">
-        {# Page main title #}
+
         <h4 class="mb-3">{{ title }}</h4>
 
         {{ form.media }}
@@ -15,8 +15,8 @@
         {# Create post form #}
         <form action="." method="POST">
           {% csrf_token %}
-          {% for field in form %}
 
+          {% for field in form %}
             {# Set different style for different form fields #}
             {% if field.name == 'title' %}
               <div class="row">
@@ -46,22 +46,25 @@
                   <small class="form-text text-danger">{{ field.errors }}</small>
                 {% endif %}
               </div>
-            {% endif %} {# End of set different style for different form fields #}
-          {% endfor %} {# End of looping over form fields #}
+            {% endif %}
+          {% endfor %}
 
-          {# On update request from post.views.post_from #}
+          {# On post update #}
           {% if request.resolver_match.url_name == 'post_update' %}
             <button class="btn btn-primary btn-lg btn-block" type="submit">Update</button>
-          {# On create request from post.views.post_from #}
+          {# On post create #}
           {% else %}
             <button class="btn btn-primary btn-lg btn-block" type="submit">Create</button>
           {% endif %}
         </form>
-      </div> {# End of container.row.col-md-8 #}
+        {# ./col-md-8 #}
+      </div>
 
       {# Side widget #}
       {% include "includes/side-widgets.html" %}
 
-    </div> {# End of container.row #}
-  </div>  {# End of container #}
+    {# ./row #}
+    </div>
+  {# ./container #}
+  </div>
 {% endblock content %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-8">
+
+        <h1 class="my-4">{{ title }}</h1>
+
+        {% if notifications %}
+            {% for notification in notifications %}
+                {% if notification.viewed is True %}
+                  <div class="alert alert-light border">
+                {% else %}
+                  <div class="alert alert-info">
+                {% endif %}
+                <a href="{% url 'notification_details' notification.id %}">
+                  {{ notification.get_feedback_message }}
+                </a>
+              </div>
+            {% endfor %}
+        {% endif %}
+
+        {# Pagination #}
+        {% include "includes/paginator.html" with queryset=notifications %}
+
+      {# ./col-md-8 #}
+      </div>
+
+      {% include "includes/side-widgets.html" with categories=categories %}
+      {# ./row #}
+    </div>
+    {# ./container #}
+  </div>
+{% endblock content %}

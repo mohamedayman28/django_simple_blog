@@ -1,11 +1,17 @@
+{% comment %}
+  This template mutual between post_search, post_related_to_autho,
+  post_filter_by_category and post_list
+{% endcomment %}
+
 {% extends "base.html" %}
 {% block content %}
   <div class="container">
     <div class="row">
 
       <div class="col-md-8">
-        {# Page main title #}
+
         <h1 class="my-4">{{ title }}</h1>
+
         {% if posts %}
           {% for post in posts  %}
             <div class="card mb-4">
@@ -17,11 +23,10 @@
                 <a href="{{ post.get_absolute_url }}" class="btn btn-primary">Read More &rarr;</a>
               </div>
               <div class="card-footer text-muted">
-                <span class="btn btn-light disabled">Posted on {{ post.timestamp.date }}</span>
-
+                <span class="btn btn-light disabled">Posted on {{ post.created_time.date }}</span>
               </div>
             </div>
-          {% endfor %} {# End of looping over each post #}
+          {% endfor %}
 
         {# Message to show if there is no posts, or no match on search #}
         {% else %}
@@ -29,17 +34,17 @@
             <div class="card-body">
               <h1 class="card-title">Sorry, there is no match.</h1>
               <p class="card-text">
-                Try another query or go to <a href="{% url 'post_home_page' %}">Home</a>
+                Try another query or go to <a href="{% url 'post_list' %}">Home</a>
               </p>
             </div>
           </div>
         {% endif %}
 
-        {# Paginate the posts #}
-        {% include "includes/paginator.html" with posts=posts %}
-      </div> {# End of container.row.col-md-8 #}
+        {# Pagination #}
+        {% include "includes/paginator.html" with queryset=posts %}
+      </div> {# End of col-md-8 #}
 
       {% include "includes/side-widgets.html" with categories=categories %}
-    </div> {# End of container.row #}
+    </div> {# End of row #}
   </div> {# End of container #}
 {% endblock content %}
