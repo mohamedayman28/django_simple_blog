@@ -1,6 +1,8 @@
 # Django Simple Blog
 <!-- Brief description goes here -->
 
+**Important Note**: The current state of the source code doesn't follow the best practices neither for Django nor Python, but I'm currently working on that and will PUSH soon.
+
 #### Jump to:
 * [Setting up locally](#setting-up-locally)
 * [File Browser package error](#file-browser-package-error)
