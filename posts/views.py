@@ -13,7 +13,7 @@ from posts.models import Category, Notification, Post
 
 
 @require_GET
-def post_list(request, category=None):
+def post_list(request):
     posts = Post.objects.only('id', 'thumbnail', 'title', 'created_time')
 
     context = {
@@ -27,11 +27,15 @@ def post_list(request, category=None):
 
 @require_GET
 def post_filter_by_category(request, category=None):
-    posts = Post.objects.only('id', 'thumbnail', 'title', 'created_time')
-
+    """
+    Return Post QuerySet filtered by the category argument, if category is None,
+    view will return empty QuerySet.
+    """
     if category:
         posts = Post.objects.filter(categories__name__icontains=category)\
             .only('id', 'thumbnail', 'title', 'created_time')
+    else:
+        posts = Post.objects.none()
 
     context = {
         'title': f'{category} posts',
@@ -41,27 +45,30 @@ def post_filter_by_category(request, category=None):
 
     return render(request, 'post-list.html', context)
 
-
 @require_GET
 def post_search(request):
-    posts = Post.objects.only('id', 'thumbnail', 'title', 'created_time')
+    """
+    Return Post QuerySet filtered by the request.GET['query'], if the query is
+    empty or space view will return empty QuerySet.
 
+    context['query'] is the query value, passed within HttpResponse, to receive
+    it within HttpRequest, so that it be possible to paginate the search
+    results, it's some sort of recursive.
+
+    Refer to includes/paginator.html, to understand the implementation.
+    """
     query = request.GET.get('query')
-    # Query is not just space characters.
     if query and not query.isspace():
         posts = Post.objects.filter(
             Q(title__icontains=query) | Q(content__icontains=query)
         )
-
-    print(query)
+    else:
+        posts = Post.objects.none()
 
     context = {
         'title': 'Search results',
         'posts': pagination(request, posts, 6),
         'categories': Category.objects.all(),
-        # Passing query value in the HttpResponse, to receive it with the
-        # HttpRequest so that it be possible to paginate the search results.
-        # -- refer to includes/paginator.html --
         'query': query
     }
 
@@ -72,7 +79,7 @@ def post_search(request):
 @login_required(login_url="accounts_login")
 def post_create(request):
     """
-    Allow Author to create post.
+    Allow logged-in Author to create post.
     """
     try:
         author = request.user.author
@@ -95,6 +102,7 @@ def post_create(request):
 
         return render(request, 'post-create.html', context)
 
+    # If logged-in User is not an Author.
     except ObjectDoesNotExist:
         messages.warning(request, 'Not authorized.')
         return redirect('post_list')
@@ -104,12 +112,12 @@ def post_create(request):
 @login_required(login_url="accounts_login")
 def post_update(request, id):
     """
-    Allow Author to update post.
+    Allow logged-in Author to update related post.
     """
     try:
         author = request.user.author
 
-        post = Post.objects.get(id=id)
+        post = get_object_or_404(Post, id=id)
         form = PostForm(request.POST or None, instance=post)
         if request.method == 'POST':
             form.instance.author = author
@@ -128,6 +136,7 @@ def post_update(request, id):
 
         return render(request, 'post-create.html', context)
 
+    # If logged-in User is not an Author.
     except ObjectDoesNotExist:
         messages.warning(request, 'Not authorized.')
         return redirect('post_list')
@@ -137,7 +146,7 @@ def post_update(request, id):
 @login_required(login_url="accounts_login")
 def post_delete(request, id):
     """
-    Allow Author to delete post.
+    Allow logged-in Author to delete related post.
     """
     try:
         request.user.author
@@ -147,6 +156,7 @@ def post_delete(request, id):
         post.delete()
         return redirect('post_list')
 
+    # If logged-in User is not an Author.
     except ObjectDoesNotExist:
         messages.warning(request, 'Not authorized.')
         return redirect('post_list')
@@ -167,23 +177,34 @@ def post_details(request, id):
 @require_GET
 @login_required(login_url="accounts_login")
 def post_related_to_author(request):
-    author = request.user.author
-    posts = Post.objects.filter(author=author).only('id', 'title')
+    """
+    Return Post QuerySet that related to currently logged-in Author.
+    """
+    try:
+        author = request.user.author
+        posts = Post.objects.filter(author=author).only('id', 'title')
 
-    if posts.exists():
-        context = {
-            'posts': pagination(request, posts, 6),
-            'categories': Category.objects.all()
-        }
-        return render(request, 'post-list.html', context)
-    else:
-        return redirect(reverse('post_list'))
+        if posts.exists():
+            context = {
+                'posts': pagination(request, posts, 6),
+                'categories': Category.objects.all()
+            }
+            return render(request, 'post-list.html', context)
+        else:
+            messages.info(request, 'You have No posts.')
+            return redirect(reverse('post_list'))
+
+    # If logged-in User is not an Author.
+    except ObjectDoesNotExist:
+        messages.warning(request, 'Not authorized.')
+        return redirect('post_list')
 
 
 @require_POST
 @login_required(login_url="accounts_login")
 def comment_create(request, id):
     post = get_object_or_404(Post, pk=id)
+
     form = CommentForm(request.POST)
     form.instance.post = post
     form.instance.content = request.POST.get('content')
@@ -200,12 +221,14 @@ def comment_create(request, id):
 @login_required(login_url="accounts_login")
 def notification_list(request):
     """
-    List current notifications related to current logged-in Author.
+    List notifications related to current logged-in Author.
     """
     try:
         author = request.user.author.id
+
         notifications = Notification.objects.select_related('post').\
             filter(post__author=author)
+
         if notifications.exists():
             title = 'Notifications'
             notifications = pagination(request, notifications, 20)
@@ -213,20 +236,24 @@ def notification_list(request):
             title = 'No notifications'
             notifications = None
 
-    # Logged-in User not an Author
+        context = {
+            'title': title,
+            'notifications': notifications
+        }
+
+        return render(request, 'notifications.html', context)
+
+    # If logged-in User is not an Author.
     except ObjectDoesNotExist:
-        pass
-
-    context = {
-        'title': title,
-        'notifications': notifications
-    }
-
-    return render(request, 'notifications.html', context)
+        messages.warning(request, 'Not authorized.')
+        return redirect('post_list')
 
 
 @require_GET
 def notification_details(request, id):
+    """
+    Change state (notification.viewed) and redirect.
+    """
     notification = Notification.objects.get(id=id)
     notification.viewed = True
     notification.save()
