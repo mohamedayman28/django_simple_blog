@@ -53,7 +53,7 @@ def post_search(request):
 
     context['query'] is the query value, passed within HttpResponse, to receive
     it within HttpRequest, so that it be possible to paginate the search
-    results, it's some sort of recursive.
+    results, it's some sort of a recursive.
 
     Refer to includes/paginator.html, to understand the implementation.
     """

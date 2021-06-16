@@ -57,7 +57,7 @@ INSTALLED_APPS = [
 
 
 MIDDLEWARE = [
-    # Third party
+    # Third party: Django debug toolbar.
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 
     # Django
@@ -69,7 +69,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-    # Third party
+    # Third party: Django live reload server.
     'livereload.middleware.LiveReloadScript',
 ]
 

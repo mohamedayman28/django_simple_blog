@@ -38,10 +38,6 @@ class Post(models.Model):
     class Meta:
         ordering = ['-created_time']
         verbose_name_plural = 'Posts'
-        indexes = [
-            models.Index(fields=['content']),
-            models.Index(fields=['title'])
-        ]
 
     def __str__(self):
         return self.title
