@@ -16,7 +16,7 @@ This app may seem not much, but the main goal not to create unique functionaliti
 * Database normalization.
 * Database access optimization.
 
-There may lack of some other best practices but the current state represents my knowledge and the app will evolve as I learn.
+There may lack some other best practices but the current state represents my knowledge and the app will evolve as I learn.
 
 Also since I implement what I learn, the app has a lot of commits and a long time of development, and these (commits and time) corresponding to the taken time to have hands-on knowledge, which is, of course, long.
 
