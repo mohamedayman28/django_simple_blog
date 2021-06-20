@@ -1,4 +1,15 @@
 # Django Simple Blog
+
+
+#### Jump to:
+* [Personal note](#personal-note)
+* [Setting up locally](#setting-up-locally)
+* [File Browser package error](#file-browser-package-error)
+* [Populate database with dummy data](#populate-database-with-dummy-data)
+
+
+## Personal note
+
 This app may seem not much, but the main goal not to create unique functionalities but rather try to implement best practices, like:
 * Clean code.
 * Django ORM best practice.
@@ -8,11 +19,6 @@ This app may seem not much, but the main goal not to create unique functionaliti
 There may lack of some other best practices but the current state represents my knowledge and the app will evolve as I learn.
 
 Also since I implement what I learn, the app has a lot of commits and a long time of development, and these (commits and time) corresponding to the taken time to have hands-on knowledge, which is, of course, long.
-
-#### Jump to:
-* [Setting up locally](#setting-up-locally)
-* [File Browser package error](#file-browser-package-error)
-* [Populate database with dummy data](#populate-database-with-dummy-data)
 
 
 ## Setting up locally
